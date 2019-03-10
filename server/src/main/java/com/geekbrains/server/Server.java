@@ -39,7 +39,7 @@ public class Server {
 
     public void privateMsg(ClientHandler sender, String receiverNick, String msg) {
         if (sender.getNickname().equals(receiverNick)) {
-            sender.sendMsg("заметка для себя: " + msg);
+            sender.sendMsg(sender.getNickname() + " - заметка для себя: " + msg);
             return;
         }
         for (ClientHandler o : clients) {
@@ -50,6 +50,10 @@ public class Server {
             }
         }
         sender.sendMsg("Клиент " + receiverNick + " не найден");
+    }
+
+    public void historyMessage(ClientHandler client, String history){
+            client.sendMsg("Прошлые сообщения: " + history);
     }
 
     public void subscribe(ClientHandler clientHandler) {
