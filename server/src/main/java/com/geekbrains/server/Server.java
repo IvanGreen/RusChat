@@ -52,8 +52,16 @@ public class Server {
         sender.sendMsg("Клиент " + receiverNick + " не найден");
     }
 
-    public void historyMessage(ClientHandler client, String history){
-            client.sendMsg("Прошлые сообщения: " + history);
+    public void historyMessage(ClientHandler client, String history){ //отправляем сообщение истории
+        client.sendMsg("/h Прошлые сообщения: " + history);
+    }
+
+    public ClientHandler getProfile(String login){ //ловим профиль отправителя
+        for (ClientHandler o : clients){
+            if (o.getLogin().equals(login))
+                return o;
+        }
+        return null;
     }
 
     public void subscribe(ClientHandler clientHandler) {

@@ -1,5 +1,7 @@
 package com.geekbrains.server;
 
+import org.apache.commons.io.input.ReversedLinesFileReader;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -15,6 +17,8 @@ public class ClientHandler {
     private DataOutputStream out;
     private String login;
     private String historyFile;
+
+
 
     public String getNickname() {
         return nickname;
@@ -38,12 +42,12 @@ public class ClientHandler {
                         if (msg.startsWith("/auth ")) {
                             String[] tokens = msg.split("\\s");
                             String nick = ConnectWithDB.getNicknameByLoginAndPassword(tokens[1], tokens[2]);
-                            String login = tokens[1];
-                            validateHistoryFile(login);
+                            login = tokens[1];
                             if (nick != null && !server.isNickBusy(nick)) {
                                 sendMsg("/authok " + nick);
                                 nickname = nick;
                                 server.subscribe(this);
+                                validateHistoryFile(login);
                                 break;
                             }
                         }
@@ -58,10 +62,6 @@ public class ClientHandler {
                             if(msg.startsWith("/w ")) {
                                 String[] tokens = msg.split("\\s", 3);
                                 server.privateMsg(this, tokens[1], tokens[2]);
-                            }
-                            if(msg.startsWith("/h ")){
-                                String[] tokens = msg.split("\\s", 2);
-                                server.historyMessage(this,tokens[1]);
                             }
                         } else {
                             server.broadcastMsg(nickname + ": " + msg);
@@ -150,23 +150,30 @@ public class ClientHandler {
     public void readHistory(){
 
         /**
-         * Не понимаю, почему отсюда не уходит сообщение и не печатает историю
-         * потому что если поменять sendMsg на SOUT, то в консоль все пишет.
-         * При выполнении кода пишет в консоль "История отправлена!", но именно
-         * в самом окне чата не появляется ничего (на стороне клиента). При этом
-         * если мы отдельно пишет в чат: /h *сообщение*, то клиент воспринимает
-         * это как попытку написать историю. Знаю что тут не реализованно 100 последних
-         * сообщений, но у меня пока что не получается и все сообщения отправить,
-         * хотя он их считавает правильно.
+         * реализованно все, кроме отправки только последних 100 строк истории.
          */
         try {
             BufferedReader reader = Files.newBufferedReader(Paths.get(historyFile));
             String history;
-            while((history = reader.readLine()) != null) sendMsg("/h " + history);
+            while((history = reader.readLine()) != null) server.historyMessage(server.getProfile(login), history);
             System.out.println("История отправлена!");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+
+//    public void readHistory(){ //пытался реализовать чтение последних 10 строк, но сил не хватило
+//        int n_lines = 10; //читает почему-то снизу через одну строчку
+//        int counter = 0; //в скором времени допишу до конца эту гадость =)
+//        try {
+//            ReversedLinesFileReader object = new ReversedLinesFileReader(new File(historyFile));
+//            while (!object.readLine().isEmpty() && counter < n_lines)
+//            {
+//                server.historyMessage(server.getProfile(login),object.readLine());
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

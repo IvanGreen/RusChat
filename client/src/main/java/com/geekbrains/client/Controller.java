@@ -102,6 +102,9 @@ public class Controller implements Initializable {
                             clientsList.getItems().add(tokens[i]);
                         }
                     });
+                } if (msg.startsWith("/h")){
+                    String[] tokens = msg.split("/h",2);
+                    textArea.appendText(tokens[1] + "\n");
                 }
             } else {
                 textArea.appendText(msg + "\n");
