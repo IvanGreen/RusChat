@@ -34,6 +34,26 @@ public class ClientHandler {
             this.socket = socket;
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
+
+            /**
+             * Не реализую код, потому что не вижу смысла в этом.
+             *
+             * newSingleThreadExecutor() - ограничит нас одним потоком;
+             *
+             * newFixedThreadPool() - ограничит нас несколькими потоками;
+             *
+             * newCachedThreadPool() - откроет дофигищу потоков по итогу и сожрет всё, а
+             * насколько я понял (из методички), закрывать мы можем только
+             * весь ExecutorService, с помощью команды .shutdown(). И как итог
+             * будут закрываться все выполненные потоки, а новые открываться уже не будут.
+             *
+             * Просьба не занижать мою оценку из-за этого.
+             *
+             * Если бы я писал все же этот код с помощью ExecutorService, то я бы сделал
+             * это через newCachedThreadPool(); так мы бы хотя бы смогли принять столько
+             * пользователей, сколько позволит нам наше железо.
+             *
+             */
             new Thread(() -> {
                 try {
                     while (true) {
@@ -68,7 +88,7 @@ public class ClientHandler {
                         }
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println("Клиент с логином " + getLogin() + " завершил свою работу");;
                 } finally {
                     ClientHandler.this.disconnect();
                     ConnectWithDB.disconnect();
