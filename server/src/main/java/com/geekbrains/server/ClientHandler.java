@@ -1,5 +1,6 @@
 package com.geekbrains.server;
 
+import log.Log4j;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 
 import java.io.*;
@@ -67,6 +68,7 @@ public class ClientHandler {
                                 sendMsg("/authok " + nick);
                                 nickname = nick;
                                 server.subscribe(this);
+                                Log4j.log.info("Клиент " + nickname + " подключился на сервер!");
                                 validateHistoryFile(login);
                                 break;
                             }
@@ -89,6 +91,7 @@ public class ClientHandler {
                     }
                 } catch (IOException e) {
                     System.out.println("Клиент с логином " + getLogin() + " завершил свою работу");;
+                    Log4j.log.info("Клиент " + nickname + " отключился от сервера");
                 } finally {
                     ClientHandler.this.disconnect();
                     ConnectWithDB.disconnect();
@@ -111,6 +114,7 @@ public class ClientHandler {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Log4j.log.error("Не удалось отправить сообщение!!!");
         }
     }
 
@@ -176,6 +180,7 @@ public class ClientHandler {
             BufferedReader reader = Files.newBufferedReader(Paths.get(historyFile));
             String history;
             while((history = reader.readLine()) != null) server.historyMessage(server.getProfile(login), history);
+            Log4j.log.info("История для пользователя записана в файл.");
             System.out.println("История отправлена!");
         } catch (IOException e) {
             e.printStackTrace();

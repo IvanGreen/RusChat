@@ -1,5 +1,7 @@
 package com.geekbrains.server;
 
+import log.Log4j;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -18,6 +20,7 @@ public class Server {
             ConnectWithDB.connect();
             ServerSocket serverSocket = new ServerSocket(8189);
             System.out.println("Сервер запущен на порту 8189");
+            Log4j.log.info("Сервер запущен на порту 8189");
             while (true) {
                 Socket socket = serverSocket.accept();
                 new ClientHandler(this, socket);
@@ -29,6 +32,7 @@ public class Server {
             e.printStackTrace();
         }
         System.out.println("Сервер завершил свою работу");
+        Log4j.log.info("Север завершил свою работу");
     }
 
     public void broadcastMsg(String msg) {
