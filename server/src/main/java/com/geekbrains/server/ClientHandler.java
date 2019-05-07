@@ -1,14 +1,11 @@
 package com.geekbrains.server;
 
 import log.Log4j;
-import org.apache.commons.io.input.ReversedLinesFileReader;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 public class ClientHandler {
     private String nickname;
@@ -19,16 +16,6 @@ public class ClientHandler {
     private String login;
     private String historyFile;
 
-
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public String getLogin(){
-        return login;
-    }
-
     public ClientHandler(Server server, Socket socket) {
         try {
             this.server = server;
@@ -36,30 +23,11 @@ public class ClientHandler {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
 
-            /**
-             * Не реализую код, потому что не вижу смысла в этом.
-             *
-             * newSingleThreadExecutor() - ограничит нас одним потоком;
-             *
-             * newFixedThreadPool() - ограничит нас несколькими потоками;
-             *
-             * newCachedThreadPool() - откроет дофигищу потоков по итогу и сожрет всё, а
-             * насколько я понял (из методички), закрывать мы можем только
-             * весь ExecutorService, с помощью команды .shutdown(). И как итог
-             * будут закрываться все выполненные потоки, а новые открываться уже не будут.
-             *
-             * Просьба не занижать мою оценку из-за этого.
-             *
-             * Если бы я писал все же этот код с помощью ExecutorService, то я бы сделал
-             * это через newCachedThreadPool(); так мы бы хотя бы смогли принять столько
-             * пользователей, сколько позволит нам наше железо.
-             *
-             */
             new Thread(() -> {
                 try {
                     while (true) {
                         String msg = in.readUTF();
-                        // /auth login1 pass1
+                        // /auth login1 pass1 for example
                         if (msg.startsWith("/auth ")) {
                             String[] tokens = msg.split("\\s");
                             String nick = ConnectWithDB.getNicknameByLoginAndPassword(tokens[1], tokens[2]);
@@ -105,11 +73,9 @@ public class ClientHandler {
     public void sendMsg(String msg) {
         try {
             out.writeUTF(msg);
-            if (msg.startsWith("/")){ //чтобы не записывать команды
+            if (msg.startsWith("/")){
                 return;
             } else {
-//                byte[] buf = msg.getBytes(); //способ через перевод в байты
-//                writeHistory(buf);
                 writeBufHistory(msg + "\r\n");
             }
         } catch (IOException e) {
@@ -137,11 +103,11 @@ public class ClientHandler {
         }
     }
 
-    public void validateHistoryFile(String login){ //определяем надо ли создавать файл
+    public void validateHistoryFile(String login){
         historyFile = "C:\\Users\\Ivan Green\\Desktop\\Geek Brains\\brains-chat\\userHistory\\" + login + "_localHistory.txt";
         if ((new File(historyFile)).exists()){
             System.out.println("Файл истории для пользователя " + login + " существует.");
-            readHistory(); // сюда надо допилить метод по чтению последнних 100 сообщений, потому что файл уже существует.
+            readHistory();
         } else{
             File file = new File("C:\\Users\\Ivan Green\\Desktop\\Geek Brains\\brains-chat\\userHistory\\" + login + "_localHistory.txt");
             System.out.println("Для пользователя " + login + " создан файл истории: " + file.getName());
@@ -149,16 +115,7 @@ public class ClientHandler {
 
     }
 
-//    public void writeHistory(byte[] bw) { //с переводом в байты
-//        try (FileOutputStream out1 = new FileOutputStream(historyFile, true)) {
-//            out1.write(bw);
-//            System.out.println("История записана в файл!");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    public void writeBufHistory(String msg){ //сам переводит в байты
+    public void writeBufHistory(String msg){
         try {
             FileWriter first = new FileWriter(historyFile,true);
             BufferedWriter writer = new BufferedWriter(first);
@@ -173,9 +130,6 @@ public class ClientHandler {
 
     public void readHistory(){
 
-        /**
-         * реализованно все, кроме отправки только последних 100 строк истории.
-         */
         try {
             BufferedReader reader = Files.newBufferedReader(Paths.get(historyFile));
             String history;
@@ -187,18 +141,11 @@ public class ClientHandler {
         }
     }
 
+    public String getNickname() {
+        return nickname;
+    }
 
-//    public void readHistory(){ //пытался реализовать чтение последних 10 строк, но сил не хватило
-//        int n_lines = 10; //читает почему-то снизу через одну строчку
-//        int counter = 0; //в скором времени допишу до конца эту гадость =)
-//        try {
-//            ReversedLinesFileReader object = new ReversedLinesFileReader(new File(historyFile));
-//            while (!object.readLine().isEmpty() && counter < n_lines)
-//            {
-//                server.historyMessage(server.getProfile(login),object.readLine());
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public String getLogin(){
+        return login;
+    }
 }

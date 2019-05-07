@@ -56,11 +56,11 @@ public class Server {
         sender.sendMsg("Клиент " + receiverNick + " не найден");
     }
 
-    public void historyMessage(ClientHandler client, String history){ //отправляем сообщение истории
+    public void historyMessage(ClientHandler client, String history){
         client.sendMsg("/h Прошлые сообщения: " + history);
     }
 
-    public ClientHandler getProfile(String login){ //ловим профиль отправителя
+    public ClientHandler getProfile(String login){
         for (ClientHandler o : clients){
             if (o.getLogin().equals(login))
                 return o;
@@ -90,13 +90,10 @@ public class Server {
     public void broadcastClientsList() {
         StringBuilder sb = new StringBuilder(15 * clients.size());
         sb.append("/clients ");
-        // '/clients '
         for (ClientHandler o : clients) {
             sb.append(o.getNickname()).append(" ");
         }
-        // '/clients nick1 nick2 nick3 '
         sb.setLength(sb.length() - 1);
-        // '/clients nick1 nick2 nick3'
         String out = sb.toString();
         for (ClientHandler o : clients) {
             o.sendMsg(out);
